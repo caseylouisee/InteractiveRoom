@@ -13,6 +13,7 @@ import android.media.ExifInterface;
 import android.media.ThumbnailUtils;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -88,16 +89,12 @@ public class ReminiscenceActivity extends AppCompatActivity {
 
     static final String FILE = "FILE";
 
-    private Animator mCurrentAnimator;
-    private int mShortAnimationDuration;
-
-
     /**
      * Int used for the rotation of images on the view
      */
     int rotate=0;
 
-    String path = "storage/extSdCard/DCIM/Camera/";
+    String path = Environment.getExternalStorageDirectory() + "/DCIM/100MEDIA/";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -195,19 +192,19 @@ public class ReminiscenceActivity extends AppCompatActivity {
             }
         }
 
-        btnOn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                turnOnLed();
-            }
-        });
+//        btnOn.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                turnOnLed();
+//            }
+//        });
 
-        btnOff.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                turnOffLed();
-            }
-        });
+//        btnOff.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                turnOffLed();
+//            }
+//        });
 
     }
 

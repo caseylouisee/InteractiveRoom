@@ -1,6 +1,7 @@
 package com.example.caseydenner.interactiveroom;
 
 import android.content.Intent;
+import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -74,8 +75,9 @@ public class IntermediateReminiscence extends AppCompatActivity {
     /**
      * Default path that is loaded for users to select a file from
      */
-    private File path = new File("storage/extSdCard/DCIM/Camera/");
-            //Environment.getExternalStorageDirectory() + "");
+    //private File path = new File(Environment.getRootDirectory() + "");
+    private File path = new File(Environment.getExternalStorageDirectory() + "/DCIM/100MEDIA/");
+    //"storage/extSdCard/DCIM/Camera/");
 
     /**
      * String holding the name of the last selected file

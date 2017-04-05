@@ -13,10 +13,11 @@
             android:label="@string/app_name"
             android:supportsRtl="true"
             android:theme="@style/AppTheme">
-        <activity android:name=".MainActivity">
+        <activity
+                android:name=".MainActivity"
+                android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
-
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
@@ -26,9 +27,13 @@
         <activity
                 android:name=".ReminiscenceActivity"
                 android:screenOrientation="landscape"/>
-        <activity android:name=".IntermediateReminiscence">
+        <activity
+                android:name=".IntermediateReminiscence"
+                android:screenOrientation="portrait">
         </activity>
-        <activity android:name=".ZoomActivity">
+        <activity
+                android:name=".ZoomActivity"
+                android:screenOrientation="landscape">
         </activity>
     </application>
 

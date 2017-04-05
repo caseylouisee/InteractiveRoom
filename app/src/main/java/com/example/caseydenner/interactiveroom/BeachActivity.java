@@ -6,14 +6,12 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.content.Intent;
 import android.media.MediaPlayer;
+import android.net.Uri;
 import android.os.AsyncTask;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
-import android.widget.Button;
 import android.widget.MediaController;
-import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.VideoView;
 
@@ -57,29 +55,6 @@ public class BeachActivity extends AppCompatActivity {
     static final UUID MYUUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
 
     /**
-     * String to hold the path of the original beach video
-     */
-    //String path = "storage/extSdCard/DCIM/Camera/";
-
-    private final String BEACH_ORIG_PATH = "storage/extSdCard/DCIM/Camera/beach.mp4";
-
-    /**
-     * String to hold the path of the beach with birds video
-     */
-    private final String BEACH_BIRDS_PATH = "storage/extSdCard/InteractiveRoom/birds.mp4";
-
-    /**
-     * Buttons on, off and disconnect
-     * on and off control the Arduino LED, disconnect disconnects the connection to the Arduino
-     */
-    Button btnOn, btnOff, btnDis;
-
-    /**
-     * TextView to display text
-     */
-    TextView text;
-
-    /**
      * VideoView to view the video
      */
     VideoView videoView;
@@ -116,11 +91,6 @@ public class BeachActivity extends AppCompatActivity {
 
         new ConnectBT().execute(); //Call the class to connect
 
-        //btnOn = (Button)findViewById(R.id.btn_on);
-        //btnOff = (Button)findViewById(R.id.btn_off);
-        //btnDis = (Button)findViewById(R.id.btn_disconnect);
-        //text = (TextView)findViewById(R.id.text_edit);
-
         m_mediaController = new MediaController(this);
         m_mediaController.setVisibility(View.GONE);
         m_mediaController.setAnchorView(videoView);
@@ -128,21 +98,10 @@ public class BeachActivity extends AppCompatActivity {
         //Log.i("onCreate Beach", getExternalStorageDirectory().toString());
         videoView = (VideoView) findViewById(R.id.videoView);
         videoView.setMediaController(m_mediaController);
-        changeVideo(BEACH_ORIG_PATH);
-
-//        btnOn.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                turnOnLed();
-//            }
-//        });
-
-//        btnOff.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                turnOffLed();
-//            }
-//        });
+        Uri video = Uri.parse("android.resource://" + getPackageName() + "/" +
+                R.raw.beachcompressed); //do not add any extension
+        videoView.setVideoURI(video);
+        videoView.start();
 
     }
 
@@ -255,10 +214,18 @@ public class BeachActivity extends AppCompatActivity {
                         @Override
                         public void run() {
                             if(strReceived.contains("butterflyButton")){
-                                changeVideo(BEACH_BIRDS_PATH);
+                                Uri video = Uri.parse("android.resource://" + getPackageName() + "/" +
+                                        R.raw.beachcompressed); //do not add any extension
+                                videoView.setVideoURI(video);
+                                videoView.start();
+                                //changeVideo(BEACH_BIRDS_PATH);
                                 playOrigVid();
                             } else if(strReceived.contains("birdsButton")){
-                                changeVideo(BEACH_BIRDS_PATH);
+                                Uri video = Uri.parse("android.resource://" + getPackageName() + "/" +
+                                        R.raw.birdscompressed); //do not add any extension
+                                videoView.setVideoURI(video);
+                                videoView.start();
+                                //changeVideo(BEACH_BIRDS_PATH);
                                 playOrigVid();
                             }
                         }});
@@ -289,45 +256,20 @@ public class BeachActivity extends AppCompatActivity {
                 new MediaPlayer.OnCompletionListener() {
                     @Override
                     public void onCompletion(MediaPlayer mp) {
-                        changeVideo(BEACH_ORIG_PATH);
+                        Uri video = Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.beachcompressed); //do not add any extension
+                        videoView.setVideoURI(video);
+                        videoView.start();
                     }
                 });
     }
-
-//    /**
-//     * Turns off the LED on the Arduino device connected via bluetooth
-//     */
-//    private void turnOffLed() {
-//        if (m_btSocket!=null) {
-//            try {
-//                m_btSocket.getOutputStream().write("TF".getBytes());
-//                Log.i("turnOffLED", "TF Sent");
-//            } catch (IOException e) {
-//                msg("Error");
-//            }
-//        }
-//    }
-//
-//    /**
-//     * Turns on the LED on the Arduino device connected via bluetooth
-//     */
-//    private void turnOnLed() {
-//        if (m_btSocket!=null) {
-//            try {
-//                m_btSocket.getOutputStream().write("TO".getBytes());
-//                Log.i("turnOnLED", "TO Sent");
-//            } catch (IOException e) {
-//                msg("Error");
-//            }
-//        }
-//    }
 
     /**
      * Changes the video path to the path specified in the string
      * @param string path to be changed to
      */
     public void changeVideo(String string){
-        videoView.setVideoPath(string);
+        Uri video = Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.beachcompressed); //do not add any extension
+        videoView.setVideoURI(video);
         videoView.start();
     }
 }
