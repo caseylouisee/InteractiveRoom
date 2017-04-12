@@ -48,7 +48,7 @@ public class IntermediateReminiscence extends AppCompatActivity {
     static final UUID MYUUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
 
     /**
-     * Buttons that are used in the activity
+     * Buttons that are used in the activity to select files
      */
     Button btnGo, btnSelectFile, btnSelectFile2, btnSelectFile3, btnSelectFile4, btnSelectFile5;
 
@@ -75,7 +75,6 @@ public class IntermediateReminiscence extends AppCompatActivity {
     /**
      * Default path that is loaded for users to select a file from
      */
-    //private File path = new File(Environment.getRootDirectory() + "");
     private File path = new File(Environment.getExternalStorageDirectory() + "/DCIM/100MEDIA/");
     //"storage/extSdCard/DCIM/Camera/");
 
@@ -122,7 +121,6 @@ public class IntermediateReminiscence extends AppCompatActivity {
                 intent.putExtra(EXTRA_ADDRESS, getAddress());
                 intent.putExtra(FILES, files);
                 startActivity(intent);
-                setContentView(R.layout.activity_reminiscence);
                 finish();
             }
         });
@@ -134,7 +132,6 @@ public class IntermediateReminiscence extends AppCompatActivity {
                 showDialog(DIALOG_LOAD_FILE);
                 btnSelectFile2.setVisibility(View.VISIBLE);
                 btnSelectFile.setText("File Selected");
-                //btnSelectFile.setText(files.get(0));
             }
         });
 
@@ -144,7 +141,7 @@ public class IntermediateReminiscence extends AppCompatActivity {
                 loadFileList();
                 showDialog(DIALOG_LOAD_FILE);
                 btnSelectFile3.setVisibility(View.VISIBLE);
-                //btnSelectFile2.setText(files.get(1));
+                btnSelectFile2.setText("File Selected");
             }
         });
 
@@ -154,7 +151,7 @@ public class IntermediateReminiscence extends AppCompatActivity {
                 loadFileList();
                 showDialog(DIALOG_LOAD_FILE);
                 btnSelectFile4.setVisibility(View.VISIBLE);
-                //btnSelectFile3.setText(files.get(2));
+                btnSelectFile3.setText("File Selected");
             }
         });
 
@@ -164,7 +161,7 @@ public class IntermediateReminiscence extends AppCompatActivity {
                 loadFileList();
                 showDialog(DIALOG_LOAD_FILE);
                 btnSelectFile5.setVisibility(View.VISIBLE);
-                //btnSelectFile4.setText(files.get(3));
+                btnSelectFile4.setText("File Selected");
             }
         });
 
@@ -173,7 +170,7 @@ public class IntermediateReminiscence extends AppCompatActivity {
             public void onClick(View view) {
                 loadFileList();
                 showDialog(DIALOG_LOAD_FILE);
-                //btnSelectFile5.setText(files.get(4));
+                btnSelectFile5.setText("File Selected");
             }
         });
 

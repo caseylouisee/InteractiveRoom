@@ -1,22 +1,31 @@
 package com.example.caseydenner.interactiveroom;
 
 import android.content.Intent;
-import android.media.ExifInterface;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.MediaController;
 import android.widget.VideoView;
 
 import java.io.File;
-import java.io.IOException;
 
 public class ZoomActivity extends AppCompatActivity {
 
+    /**
+     * String representing file recieved via intent
+     */
     private String m_file = "";
 
+    /**
+     * VideoView used to display file
+     */
     VideoView videoView;
 
+    /**
+     * integer representing how much the file should be rotated depending on it's orientation
+     */
     int rotate;
 
     /**
@@ -28,6 +37,7 @@ public class ZoomActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_zoom);
+        Log.d("OnCreate", "Zoom Activity");
 
         Intent newInt = getIntent();
         m_file = newInt.getStringExtra(ReminiscenceActivity.FILE);
@@ -35,7 +45,8 @@ public class ZoomActivity extends AppCompatActivity {
         videoView = (VideoView) findViewById(R.id.videoViewZoomed);
         File file = new File(m_file);
 
-        checkOrientation(file);
+        ReminiscenceActivity reminiscenceActivity = new ReminiscenceActivity();
+        reminiscenceActivity.checkOrientation(file);
 
         m_mediaController = new MediaController(this);
         m_mediaController.setVisibility(View.GONE);
@@ -45,27 +56,13 @@ public class ZoomActivity extends AppCompatActivity {
         videoView.setVideoPath(m_file);
         videoView.setRotation(rotate);
         videoView.start();
+
+        videoView.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+            @Override
+            public void onCompletion(MediaPlayer mp) {
+                finish();
+            }
+        });
     }
 
-    private void checkOrientation(File imageFile){
-        rotate=0;
-        ExifInterface exif = null;
-        try {
-            exif = new ExifInterface(imageFile.getAbsolutePath());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        int orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
-        switch (orientation) {
-            case ExifInterface.ORIENTATION_ROTATE_270:
-                rotate = 270;
-                break;
-            case ExifInterface.ORIENTATION_ROTATE_180:
-                rotate = 180;
-                break;
-            case ExifInterface.ORIENTATION_ROTATE_90:
-                rotate = 90;
-                break;
-        }
-    }
 }

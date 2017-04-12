@@ -3,9 +3,8 @@ package com.example.caseydenner.interactiveroom;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -76,7 +75,6 @@ public class MainActivity extends AppCompatActivity {
                     Intent intent = new Intent(MainActivity.this, BeachActivity.class);
                     intent.putExtra(EXTRA_ADDRESS, getAddress());
                     startActivity(intent);
-                    setContentView(R.layout.activity_beach);
 
                 } else if (BTN_REMINISCE.isChecked()) {
                     connectToArduino();
@@ -85,7 +83,6 @@ public class MainActivity extends AppCompatActivity {
                     Intent intent = new Intent(MainActivity.this, IntermediateReminiscence.class);
                     intent.putExtra(EXTRA_ADDRESS, getAddress());
                     startActivity(intent);
-                    setContentView(R.layout.activity_intermediate_reminiscence);
 
                 } else {
                     Log.i(METHOD, "nothing is checked");

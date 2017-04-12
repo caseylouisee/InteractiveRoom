@@ -1,8 +1,5 @@
 package com.example.caseydenner.interactiveroom;
 
-import android.animation.Animator;
-import android.animation.AnimatorSet;
-import android.animation.ObjectAnimator;
 import android.app.ProgressDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -13,13 +10,14 @@ import android.media.ExifInterface;
 import android.media.ThumbnailUtils;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
-import android.widget.*;
+import android.widget.ImageView;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import java.io.File;
 import java.io.IOException;
@@ -65,12 +63,6 @@ public class ReminiscenceActivity extends AppCompatActivity {
     static final UUID MYUUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
 
     /**
-     * Buttons on, off and disconnect
-     * on and off control the Arduino LED, disconnect disconnects the connection to the Arduino
-     */
-    Button btnOn, btnOff;
-
-    /**
      * TextView to display text
      */
     TextView text;
@@ -85,8 +77,14 @@ public class ReminiscenceActivity extends AppCompatActivity {
      */
     ThreadConnected m_ThreadConnected;
 
+    /**
+     * The imageViews visible on the activity
+     */
     ImageView imageView1, imageView2, imageView3, imageView4, imageView5;
 
+    /**
+     * final String used for transferring extra data in an intent
+     */
     static final String FILE = "FILE";
 
     /**
@@ -94,22 +92,22 @@ public class ReminiscenceActivity extends AppCompatActivity {
      */
     int rotate=0;
 
+    /**
+     * Path on the phone where the media from the Camera is stored.
+     */
     String path = Environment.getExternalStorageDirectory() + "/DCIM/100MEDIA/";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_reminiscence);
 
         Intent newInt = getIntent();
         m_address = newInt.getStringExtra(IntermediateReminiscence.EXTRA_ADDRESS);
         files = newInt.getStringArrayListExtra(IntermediateReminiscence.FILES);
 
-        setContentView(R.layout.activity_reminiscence);
-
         new ConnectBT().execute(); //Call the class to connect
 
-        btnOn = (Button)findViewById(R.id.btn_on);
-        btnOff = (Button)findViewById(R.id.btn_off);
         text = (TextView)findViewById(R.id.text_edit);
         imageView1 = (ImageView) findViewById(R.id.imageView);
         imageView2 = (ImageView) findViewById(R.id.imageView2);
@@ -121,91 +119,41 @@ public class ReminiscenceActivity extends AppCompatActivity {
         for(int i = 0; i<fileSize; i++){
             if(i==0){
                 File imageFile = new File(path+files.get(i));
-                if(files.get(i).endsWith("mp4")){
-                    Bitmap bMap = ThumbnailUtils.createVideoThumbnail(imageFile.getAbsolutePath(),
-                            MediaStore.Video.Thumbnails.MINI_KIND);
-                    imageView1.setImageBitmap(bMap);
-                } else {
-                    checkOrientation(imageFile);
-                    imageView1.setImageURI(null);
-                    imageView1.setImageURI(Uri.parse(path + files.get(i)));
-                    imageView1.setRotation(rotate);
-                }
-                imageView1.invalidate();
-                Log.d("onCreate", "imageView1 set: " + path+files.get(i) + " rotation: " + rotate);
-            } if(i==1){
+                checkOrientation(imageFile);
+                setImageView(imageView1, i, imageFile);
+            } if(i==1) {
                 File imageFile = new File(path+files.get(i));
-                if(files.get(i).endsWith("mp4")) {
-                    Bitmap bMap = ThumbnailUtils.createVideoThumbnail(imageFile.getAbsolutePath(),
-                            MediaStore.Video.Thumbnails.MINI_KIND);
-                    imageView2.setImageBitmap(bMap);
-                } else {
-                    checkOrientation(imageFile);
-                    imageView2.setImageURI(null);
-                    imageView2.setImageURI(Uri.parse(path + files.get(i)));
-                    imageView2.setRotation(rotate);
-                }
-                imageView2.invalidate();
-                Log.d("onCreate", "imageView2 set: " + path+files.get(i) + " rotation: " + rotate);
+                checkOrientation(imageFile);
+                setImageView(imageView2, i, imageFile);
             } if(i==2){
                 File imageFile = new File(path+files.get(i));
-                if(files.get(i).endsWith("mp4")){
-                    Bitmap bMap = ThumbnailUtils.createVideoThumbnail(imageFile.getAbsolutePath(),
-                            MediaStore.Video.Thumbnails.MINI_KIND);
-                    imageView3.setImageBitmap(bMap);
-                } else {
-                    checkOrientation(imageFile);
-                    imageView3.setImageURI(null);
-                    imageView3.setImageURI(Uri.parse(path + files.get(i)));
-                    imageView3.setRotation(rotate);
-                }
-                imageView3.invalidate();
-                Log.d("onCreate", "imageView3 set: " + path+files.get(i) + " rotation: " + rotate);
+                checkOrientation(imageFile);
+                setImageView(imageView3, i, imageFile);
             } if(i==3){
                 File imageFile = new File(path+files.get(i));
-                if(files.get(i).endsWith("mp4")){
-                    Bitmap bMap = ThumbnailUtils.createVideoThumbnail(imageFile.getAbsolutePath(),
-                            MediaStore.Video.Thumbnails.MINI_KIND);
-                    imageView4.setImageBitmap(bMap);
-                } else {
-                    checkOrientation(imageFile);
-                    imageView4.setImageURI(null);
-                    imageView4.setImageURI(Uri.parse(path + files.get(i)));
-                    imageView4.setRotation(rotate);
-                }
-                imageView4.invalidate();
-                Log.d("onCreate", "imageView4 set: " + path+files.get(i) + " rotation: " + rotate);
-            } if(i==4){
-                File imageFile = new File(path+files.get(i));
-                if(files.get(i).endsWith("mp4")){
-                    Bitmap bMap = ThumbnailUtils.createVideoThumbnail(imageFile.getAbsolutePath(),
-                            MediaStore.Video.Thumbnails.MINI_KIND);
-                    imageView5.setImageBitmap(bMap);
-                } else {
-                    checkOrientation(imageFile);
-                    imageView5.setImageURI(null);
-                    imageView5.setImageURI(Uri.parse(path + files.get(i)));
-                    imageView5.setRotation(rotate);
-                }
-                imageView5.invalidate();
-                Log.d("onCreate", "imageView5 set: " + path+files.get(i) + " rotation: " + rotate);
+                checkOrientation(imageFile);
+                setImageView(imageView4, i, imageFile);
+            } if(i==4) {
+                File imageFile = new File(path + files.get(i));
+                checkOrientation(imageFile);
+                setImageView(imageView5, i, imageFile);
             }
         }
 
-//        btnOn.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                turnOnLed();
-//            }
-//        });
+    }
 
-//        btnOff.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                turnOffLed();
-//            }
-//        });
-
+    private void setImageView(ImageView imageView, int i, File imageFile) {
+        if(files.get(i).endsWith("mp4")){
+            Bitmap bMap = ThumbnailUtils.createVideoThumbnail(imageFile.getAbsolutePath(),
+                    MediaStore.Video.Thumbnails.MINI_KIND);
+            imageView.setImageBitmap(bMap);
+        } else {
+            imageView.setImageURI(null);
+            imageView.setImageURI(Uri.parse(path + files.get(i)));
+            imageView.setRotation(rotate);
+        }
+        imageView.invalidate();
+        Log.d("onCreate", "imageView set: " + path+files.get(i) + " rotation: " + rotate);
     }
 
     /**
@@ -315,10 +263,17 @@ public class ReminiscenceActivity extends AppCompatActivity {
                     runOnUiThread(new Runnable(){
                         @Override
                         public void run() {
-                            if(strReceived.contains("buttonOne")){
+                            if(strReceived.contains("butterflyButton")){
+                                Log.d("butterflyButton", path+files.get(0) + " to play in zoomActivity");
+                                Intent intent = new Intent(ReminiscenceActivity.this, ZoomActivity.class);
+                                intent.putExtra(FILE, path+files.get(0));
+                                startActivity(intent);
+
+                            } else if(strReceived.contains("birdsButton")){
+                                Log.d("butterflyButton", path+files.get(1) + " to play in zoomActivity");
                                 Intent intent = new Intent(ReminiscenceActivity.this, ZoomActivity.class);
                                 intent.putExtra(FILE, path+files.get(1));
-                            } else if(strReceived.contains("buttonTwo")){
+                                startActivity(intent);
 
                             }
                         }});
@@ -332,7 +287,12 @@ public class ReminiscenceActivity extends AppCompatActivity {
 
     }
 
-    private void checkOrientation(File imageFile){
+    /**
+     * Checks orientation of file (both video and images) and if they are not horizontal, then the file is rotated in
+     * order for it to be displayed correctly in landscape on the activity.
+     * @param imageFile file to check orientation of
+     */
+    public void checkOrientation(File imageFile){
         rotate=0;
         ExifInterface exif = null;
         try {
@@ -355,8 +315,6 @@ public class ReminiscenceActivity extends AppCompatActivity {
     }
 
 
-
-
     /**
      * Provides a quicker way to create Toasts on the screen
      * @param s the message to be included in the toast
@@ -365,31 +323,4 @@ public class ReminiscenceActivity extends AppCompatActivity {
         Toast.makeText(getApplicationContext(), s, Toast.LENGTH_LONG).show();
     }
 
-    /**
-     * Turns off the LED on the Arduino device connected via bluetooth
-     */
-    private void turnOffLed() {
-        if (m_btSocket!=null) {
-            try {
-                m_btSocket.getOutputStream().write("TF".getBytes());
-                Log.i("turnOffLED", "TF Sent");
-            } catch (IOException e) {
-                msg("Error");
-            }
-        }
-    }
-
-    /**
-     * Turns on the LED on the Arduino device connected via bluetooth
-     */
-    private void turnOnLed() {
-        if (m_btSocket!=null) {
-            try {
-                m_btSocket.getOutputStream().write("TO".getBytes());
-                Log.i("turnOnLED", "TO Sent");
-            } catch (IOException e) {
-                msg("Error");
-            }
-        }
-    }
 }

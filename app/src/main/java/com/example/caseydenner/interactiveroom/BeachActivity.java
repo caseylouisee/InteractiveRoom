@@ -10,6 +10,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.MediaController;
 import android.widget.Toast;
@@ -214,18 +215,25 @@ public class BeachActivity extends AppCompatActivity {
                         @Override
                         public void run() {
                             if(strReceived.contains("butterflyButton")){
+                                Log.d("run", "butterflyButton");
                                 Uri video = Uri.parse("android.resource://" + getPackageName() + "/" +
-                                        R.raw.beachcompressed); //do not add any extension
+                                        R.raw.butterfliescompressed); //do not add any extension
                                 videoView.setVideoURI(video);
                                 videoView.start();
-                                //changeVideo(BEACH_BIRDS_PATH);
                                 playOrigVid();
                             } else if(strReceived.contains("birdsButton")){
+                                Log.d("run", "birdsButton");
                                 Uri video = Uri.parse("android.resource://" + getPackageName() + "/" +
                                         R.raw.birdscompressed); //do not add any extension
                                 videoView.setVideoURI(video);
                                 videoView.start();
-                                //changeVideo(BEACH_BIRDS_PATH);
+                                playOrigVid();
+                            } else if(strReceived.contains("pin11")){
+                                Log.d("run", "pin 11");
+                                Uri video = Uri.parse("android.resource://" + getPackageName() + "/" +
+                                        R.raw.birdscompressed); //do not add any extension
+                                videoView.setVideoURI(video);
+                                videoView.start();
                                 playOrigVid();
                             }
                         }});
@@ -261,15 +269,5 @@ public class BeachActivity extends AppCompatActivity {
                         videoView.start();
                     }
                 });
-    }
-
-    /**
-     * Changes the video path to the path specified in the string
-     * @param string path to be changed to
-     */
-    public void changeVideo(String string){
-        Uri video = Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.beachcompressed); //do not add any extension
-        videoView.setVideoURI(video);
-        videoView.start();
     }
 }
