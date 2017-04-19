@@ -14,24 +14,24 @@ import java.io.File;
 public class ZoomActivity extends AppCompatActivity {
 
     /**
-     * String representing file recieved via intent
+     * MediaController for the video view
      */
-    private String m_file = "";
+    private MediaController m_mediaController;
 
     /**
      * VideoView used to display file
      */
-    VideoView videoView;
+    private VideoView videoView;
 
     /**
-     * integer representing how much the file should be rotated depending on it's orientation
+     * String representing file received via intent
      */
-    int rotate;
+    private String m_file = "";
 
     /**
-     * MediaController for the video view
+     * integer representing how much to rotate the file used in the activity
      */
-    MediaController m_mediaController;
+    private int m_rotate;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,7 +54,7 @@ public class ZoomActivity extends AppCompatActivity {
         videoView.setMediaController(m_mediaController);
 
         videoView.setVideoPath(m_file);
-        videoView.setRotation(rotate);
+        videoView.setRotation(m_rotate);
         videoView.start();
 
         videoView.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {

@@ -28,29 +28,44 @@ import java.util.UUID;
 public class ReminiscenceActivity extends AppCompatActivity {
 
     /**
-     * String holding the connected device's mac address
+     * SPP UUID. Look for it
      */
-    String m_address = null;
+    private static final UUID MYUUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
 
     /**
-     * ArrayList holding strings
+     * final String used for transferring extra data in an intent
      */
-    ArrayList<String> files = new ArrayList<>();
+    public static final String FILE = "FILE";
 
     /**
-     * ProgressDialog
+     * The imageViews visible on the activity
      */
-    private ProgressDialog m_progress;
+    private ImageView m_imageView1, m_imageView2, m_imageView3, m_imageView4;
 
     /**
      * Bluetooth adapter
      */
-    BluetoothAdapter m_Bluetooth = null;
+    private BluetoothAdapter m_Bluetooth = null;
 
     /**
      * Bluetooth socket
      */
-    BluetoothSocket m_btSocket = null;
+    private BluetoothSocket m_btSocket = null;
+
+    /**
+     * InputStream used to retrieve information sent from Arduino to Android via bluetooth
+     */
+    private InputStream m_inputStream;
+
+    /**
+     * Thread to manage the bluetooth connection
+     */
+    private ThreadConnected m_ThreadConnected;
+
+    /**
+     * ProgressDialog to show the progress of the bluetooth connection
+     */
+    private ProgressDialog m_progress;
 
     /**
      * Boolean to check whether bluetooth is connected to a device
@@ -58,102 +73,89 @@ public class ReminiscenceActivity extends AppCompatActivity {
     private boolean m_isBtConnected = false;
 
     /**
-     * SPP UUID. Look for it
+     * String holding the connected device's mac address
      */
-    static final UUID MYUUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
+    private String m_address = null;
 
     /**
-     * TextView to display text
+     * ArrayList holding strings
      */
-    TextView text;
-
-    /**
-     * InputStream used to retrieve information sent from Arduino to Android via bluetooth
-     */
-    InputStream m_inputStream;
-
-    /**
-     * Thread to manage the bluetooth connection
-     */
-    ThreadConnected m_ThreadConnected;
-
-    /**
-     * The imageViews visible on the activity
-     */
-    ImageView imageView1, imageView2, imageView3, imageView4, imageView5;
-
-    /**
-     * final String used for transferring extra data in an intent
-     */
-    static final String FILE = "FILE";
+    private ArrayList<String> m_files = new ArrayList<>();
 
     /**
      * Int used for the rotation of images on the view
      */
-    int rotate=0;
+    private int m_rotate=0;
 
     /**
      * Path on the phone where the media from the Camera is stored.
      */
-    String path = Environment.getExternalStorageDirectory() + "/DCIM/100MEDIA/";
+    private String m_path = Environment.getExternalStorageDirectory() + "/DCIM/100MEDIA/";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        final String METHOD = "onCreate";
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_reminiscence);
 
         Intent newInt = getIntent();
         m_address = newInt.getStringExtra(IntermediateReminiscence.EXTRA_ADDRESS);
-        files = newInt.getStringArrayListExtra(IntermediateReminiscence.FILES);
+        m_files = newInt.getStringArrayListExtra(IntermediateReminiscence.FILES);
 
         new ConnectBT().execute(); //Call the class to connect
 
-        text = (TextView)findViewById(R.id.text_edit);
-        imageView1 = (ImageView) findViewById(R.id.imageView);
-        imageView2 = (ImageView) findViewById(R.id.imageView2);
-        imageView3 = (ImageView) findViewById(R.id.imageView3);
-        imageView4 = (ImageView) findViewById(R.id.imageView4);
-        imageView5 = (ImageView) findViewById(R.id.imageView5);
-
-        int fileSize = files.size();
-        for(int i = 0; i<fileSize; i++){
-            if(i==0){
-                File imageFile = new File(path+files.get(i));
-                checkOrientation(imageFile);
-                setImageView(imageView1, i, imageFile);
-            } if(i==1) {
-                File imageFile = new File(path+files.get(i));
-                checkOrientation(imageFile);
-                setImageView(imageView2, i, imageFile);
-            } if(i==2){
-                File imageFile = new File(path+files.get(i));
-                checkOrientation(imageFile);
-                setImageView(imageView3, i, imageFile);
-            } if(i==3){
-                File imageFile = new File(path+files.get(i));
-                checkOrientation(imageFile);
-                setImageView(imageView4, i, imageFile);
-            } if(i==4) {
-                File imageFile = new File(path + files.get(i));
-                checkOrientation(imageFile);
-                setImageView(imageView5, i, imageFile);
-            }
-        }
+        setView();
 
     }
 
+    private void setView(){
+        m_imageView1 = (ImageView) findViewById(R.id.imageView);
+        m_imageView2 = (ImageView) findViewById(R.id.imageView2);
+        m_imageView3 = (ImageView) findViewById(R.id.imageView3);
+        m_imageView4 = (ImageView) findViewById(R.id.imageView4);
+
+        int fileSize = m_files.size();
+        for(int i = 0; i<fileSize; i++){
+            if(i==0){
+                File imageFile = new File(m_path+m_files.get(i));
+                checkOrientation(imageFile);
+                setImageView(m_imageView1, i, imageFile);
+            } if(i==1) {
+                File imageFile = new File(m_path+m_files.get(i));
+                checkOrientation(imageFile);
+                setImageView(m_imageView2, i, imageFile);
+            } if(i==2){
+                File imageFile = new File(m_path+m_files.get(i));
+                checkOrientation(imageFile);
+                setImageView(m_imageView3, i, imageFile);
+            } if(i==3){
+                File imageFile = new File(m_path+m_files.get(i));
+                checkOrientation(imageFile);
+                setImageView(m_imageView4, i, imageFile);
+            }
+        }
+    }
+
+    /**
+     * Sets the imageView image based on the file the user selects to upload. A thumbnail of the video is output in
+     * the imageView.
+     * @param imageView The imageView where the image is shown
+     * @param i the index number of the file path in the array m_files
+     * @param imageFile The image to be displayed in the view
+     */
     private void setImageView(ImageView imageView, int i, File imageFile) {
-        if(files.get(i).endsWith("mp4")){
+        if(m_files.get(i).endsWith("mp4")){
             Bitmap bMap = ThumbnailUtils.createVideoThumbnail(imageFile.getAbsolutePath(),
                     MediaStore.Video.Thumbnails.MINI_KIND);
             imageView.setImageBitmap(bMap);
         } else {
             imageView.setImageURI(null);
-            imageView.setImageURI(Uri.parse(path + files.get(i)));
-            imageView.setRotation(rotate);
+            imageView.setImageURI(Uri.parse(m_path + m_files.get(i)));
+            imageView.setRotation(m_rotate);
         }
         imageView.invalidate();
-        Log.d("onCreate", "imageView set: " + path+files.get(i) + " rotation: " + rotate);
+        Log.d("onCreate", "imageView set: " + m_path+m_files.get(i) + " rotation: " + m_rotate);
     }
 
     /**
@@ -228,7 +230,7 @@ public class ReminiscenceActivity extends AppCompatActivity {
 
     /**
      * Starts a thread which checks for any incoming messages from the input stream
-     * @param socket
+     * @param socket bluetooth socket to connect to
      */
     private void startThreadConnected(BluetoothSocket socket){
         m_ThreadConnected = new ThreadConnected(socket);
@@ -240,7 +242,7 @@ public class ReminiscenceActivity extends AppCompatActivity {
          * Checks if the input stream isn't null
          * @param socket the bluetooth socket which the input stream comes from
          */
-        public ThreadConnected(BluetoothSocket socket) {
+        private ThreadConnected(BluetoothSocket socket) {
             m_inputStream = null;
 
             try {
@@ -264,17 +266,25 @@ public class ReminiscenceActivity extends AppCompatActivity {
                         @Override
                         public void run() {
                             if(strReceived.contains("butterflyButton")){
-                                Log.d("butterflyButton", path+files.get(0) + " to play in zoomActivity");
+                                Log.d("butterflyButton", m_path+m_files.get(0) + " to play in zoomActivity");
                                 Intent intent = new Intent(ReminiscenceActivity.this, ZoomActivity.class);
-                                intent.putExtra(FILE, path+files.get(0));
+                                intent.putExtra(FILE, m_path+m_files.get(0));
                                 startActivity(intent);
-
                             } else if(strReceived.contains("birdsButton")){
-                                Log.d("butterflyButton", path+files.get(1) + " to play in zoomActivity");
+                                Log.d("butterflyButton", m_path+m_files.get(1) + " to play in zoomActivity");
                                 Intent intent = new Intent(ReminiscenceActivity.this, ZoomActivity.class);
-                                intent.putExtra(FILE, path+files.get(1));
+                                intent.putExtra(FILE, m_path+m_files.get(1));
                                 startActivity(intent);
-
+                            } else if(strReceived.contains("three")){
+                                Log.d("three", m_path+m_files.get(2) + " to play in zoomActivity");
+                                Intent intent = new Intent(ReminiscenceActivity.this, ZoomActivity.class);
+                                intent.putExtra(FILE, m_path+m_files.get(2));
+                                startActivity(intent);
+                            } else if(strReceived.contains("four")) {
+                                Log.d("four", m_path+m_files.get(3) + " to play in zoomActivity");
+                                Intent intent = new Intent(ReminiscenceActivity.this, ZoomActivity.class);
+                                intent.putExtra(FILE, m_path+m_files.get(3));
+                                startActivity(intent);
                             }
                         }});
 
@@ -293,7 +303,7 @@ public class ReminiscenceActivity extends AppCompatActivity {
      * @param imageFile file to check orientation of
      */
     public void checkOrientation(File imageFile){
-        rotate=0;
+        m_rotate=0;
         ExifInterface exif = null;
         try {
             exif = new ExifInterface(imageFile.getAbsolutePath());
@@ -303,17 +313,16 @@ public class ReminiscenceActivity extends AppCompatActivity {
         int orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
         switch (orientation) {
             case ExifInterface.ORIENTATION_ROTATE_270:
-                rotate = 270;
+                m_rotate = 270;
                 break;
             case ExifInterface.ORIENTATION_ROTATE_180:
-                rotate = 180;
+                m_rotate = 180;
                 break;
             case ExifInterface.ORIENTATION_ROTATE_90:
-                rotate = 90;
+                m_rotate = 90;
                 break;
         }
     }
-
 
     /**
      * Provides a quicker way to create Toasts on the screen

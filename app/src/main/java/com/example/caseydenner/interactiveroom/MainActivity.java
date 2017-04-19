@@ -26,6 +26,21 @@ public class MainActivity extends AppCompatActivity {
     public static String EXTRA_ADDRESS = "device_address";
 
     /**
+     * Button go used to proceed to the next activity
+     */
+    private Button m_btnGo;
+
+    /**
+     * Radio buttons used to select the scene to project
+     */
+    private RadioButton m_btnBeach, m_btnReminisce;
+
+    /**
+     * Text view to output information to the user
+     */
+    private TextView m_textView;
+
+    /**
      * Bluetooth adapter used to connect to bluetooth socket
      */
     private BluetoothAdapter m_Bluetooth = null;
@@ -35,19 +50,41 @@ public class MainActivity extends AppCompatActivity {
      */
     private String m_address;
 
+    /**
+     * Method to get the bluetooth device's address
+     * @return m_address the bluetooth device's address
+     */
+    public String getAddress() {
+        return m_address;
+    }
+
+    /**
+     * Method to set the bluetooth device's address
+     * @param string set as the bluetooth device's address
+     */
+    public void setAddress(String string){
+        m_address = string;
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         final String METHOD = "onCreate";
-
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Log.d(METHOD, "main activity created");
+        setUpBluetooth();
+        setView();
+    }
+
+    private void setUpBluetooth(){
+        final String METHOD = "setUpBluetooth";
 
         //if the device has bluetooth
         m_Bluetooth = BluetoothAdapter.getDefaultAdapter();
 
         if (m_Bluetooth == null) {
             //Show a message. that the device has no bluetooth adapter
+            Log.d(METHOD, "Bluetooth Device Not Available");
             Toast.makeText(getApplicationContext(), "Bluetooth Device Not Available",
                     Toast.LENGTH_LONG).show();
 
@@ -55,49 +92,52 @@ public class MainActivity extends AppCompatActivity {
             finish();
         } else if (!m_Bluetooth.isEnabled()) {
             //Ask to the user turn the bluetooth on
+            Log.d(METHOD, "Ask user to turn bluetooth on");
             Intent turnBTon = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             startActivityForResult(turnBTon, 1);
         }
+    }
 
-        final RadioButton BTN_BEACH = (RadioButton) findViewById(R.id.radioBeach);
-        final RadioButton BTN_REMINISCE = (RadioButton) findViewById(R.id.radioReminisce);
-        final TextView TV_OUTPUT = (TextView) findViewById(R.id.textViewOutput);
-        TV_OUTPUT.setVisibility(View.INVISIBLE);
+    private void setView(){
+        final String METHOD = "setView";
+        m_btnBeach = (RadioButton) findViewById(R.id.radioBeach);
+        m_btnReminisce = (RadioButton) findViewById(R.id.radioReminisce);
+        m_textView = (TextView) findViewById(R.id.textViewOutput);
+        m_textView.setVisibility(View.INVISIBLE);
 
-        final Button GO = (Button) findViewById(R.id.buttonGo);
+        m_btnGo= (Button) findViewById(R.id.buttonGo);
 
-        GO.setOnClickListener(new View.OnClickListener() {
+        m_btnGo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (BTN_BEACH.isChecked()) {
+                if (m_btnBeach.isChecked()) {
                     connectToArduino();
-                    Log.i(METHOD, "beach is checked");
+                    Log.d(METHOD, "beach is checked");
                     Intent intent = new Intent(MainActivity.this, BeachActivity.class);
                     intent.putExtra(EXTRA_ADDRESS, getAddress());
                     startActivity(intent);
 
-                } else if (BTN_REMINISCE.isChecked()) {
+                } else if (m_btnReminisce.isChecked()) {
                     connectToArduino();
-                    Log.i(METHOD, "reminiscence is checked");
+                    Log.d(METHOD, "reminiscence is checked");
 
                     Intent intent = new Intent(MainActivity.this, IntermediateReminiscence.class);
                     intent.putExtra(EXTRA_ADDRESS, getAddress());
                     startActivity(intent);
 
                 } else {
-                    Log.i(METHOD, "nothing is checked");
-                    TV_OUTPUT.setText("Please select a scene to project");
-                    TV_OUTPUT.setVisibility(View.VISIBLE);
+                    Log.d(METHOD, "nothing is checked");
+                    m_textView.setText("Please select a scene to project");
+                    m_textView.setVisibility(View.VISIBLE);
                 }
             }
         });
-
     }
 
     /**
      * Connects to the Arduino via bluetooth using the device name to auto connect
      */
-    public void connectToArduino() {
+    private void connectToArduino() {
         final String METHOD = "connectToArduino";
         Set<BluetoothDevice> pairedDevices = m_Bluetooth.getBondedDevices();
         ArrayList list = new ArrayList();
@@ -117,19 +157,4 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    /**
-     * Method to get the bluetooth device's address
-     * @return m_address the bluetooth device's address
-     */
-    public String getAddress() {
-        return m_address;
-    }
-
-    /**
-     * Method to set the bluetooth device's address
-     * @param string set as the bluetooth device's address
-     */
-    public void setAddress(String string){
-        m_address = string;
-    }
 }

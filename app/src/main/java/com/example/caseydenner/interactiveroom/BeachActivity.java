@@ -26,54 +26,59 @@ import java.util.UUID;
 public class BeachActivity extends AppCompatActivity {
 
     /**
-     * String holding the connected device's mac address
+     * SPP UUID. Look for it
      */
-    String m_address = null;
+    private static final UUID MYUUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
 
     /**
-     * ProgressDialog
+     * String used in logs with the class name
      */
-    private ProgressDialog m_progress;
+    private final String CLASS = "BeachActivity";
+    
+    /**
+     * VideoView to view the video
+     */
+    private VideoView videoView;
+
+    /**
+     * MediaController for the video view
+     */
+    private MediaController m_mediaController;
 
     /**
      * Bluetooth adapter
      */
-    BluetoothAdapter m_Bluetooth = null;
+    private BluetoothAdapter m_Bluetooth = null;
 
     /**
      * Bluetooth socket
      */
-    BluetoothSocket m_btSocket = null;
+    private BluetoothSocket m_btSocket = null;
+
+    /**
+     * InputStream used to retrieve information sent from Arduino to Android via bluetooth
+     */
+    private InputStream m_inputStream;
+
+    /**
+     * ProgressDialog used to show progress of the connection to the Arduino
+     */
+    private ProgressDialog m_progress;
+
+    /**
+     * Thread to manage the bluetooth connection
+     */
+    private ThreadConnected m_ThreadConnected;
+
+    /**
+     * String holding the connected device's mac address
+     */
+    private String m_address = null;
 
     /**
      * Boolean to check whether bluetooth is connected to a device
      */
     private boolean m_isBtConnected = false;
-
-    /**
-     * SPP UUID. Look for it
-     */
-    static final UUID MYUUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
-
-    /**
-     * VideoView to view the video
-     */
-    VideoView videoView;
-
-    /**
-     * MediaController for the video view
-     */
-    MediaController m_mediaController;
-
-    /**
-     * InputStream used to retrieve information sent from Arduino to Android via bluetooth
-     */
-    InputStream m_inputStream;
-
-    /**
-     * Thread to manage the bluetooth connection
-     */
-    ThreadConnected m_ThreadConnected;
 
     /**
      * Called when the BeachActivity is created
@@ -82,16 +87,22 @@ public class BeachActivity extends AppCompatActivity {
      */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Log.d(CLASS, "Activity called");
+        final String METHOD = "onCreate";
+        Log.d(METHOD, "called");
         super.onCreate(savedInstanceState);
-
         Intent newInt = getIntent();
         //receive the address of the bluetooth device
         m_address = newInt.getStringExtra(MainActivity.EXTRA_ADDRESS);
-
         setContentView(R.layout.activity_beach);
-
         new ConnectBT().execute(); //Call the class to connect
+        setView();
+    }
 
+    /**
+     * Sets view including the media controller and video view
+     */
+    private void setView(){
         m_mediaController = new MediaController(this);
         m_mediaController.setVisibility(View.GONE);
         m_mediaController.setAnchorView(videoView);
@@ -103,14 +114,15 @@ public class BeachActivity extends AppCompatActivity {
                 R.raw.beachcompressed); //do not add any extension
         videoView.setVideoURI(video);
         videoView.start();
-
     }
 
     /**
-     * Disconnects/Closes Arduino bluetooth connection
+     * Disconnects/Closes Arduino bluetooth connection and returned to the Main activity
      */
     @Override
     public void onBackPressed(){
+        final String METHOD = "onBackPressed";
+        Log.d(METHOD, "back buton pressed");
         if (m_btSocket!=null) {
             try {
                 m_btSocket.close(); //close connection
@@ -127,10 +139,12 @@ public class BeachActivity extends AppCompatActivity {
      * Connects to the bluetooth device (Arduino)
      */
     private class ConnectBT extends AsyncTask<Void, Void, Void> {
+        final String CLASS = "connectBT";
         private boolean connectSuccess = true;
 
         @Override
         protected void onPreExecute(){
+            Log.d(CLASS, "onPreExecute");
             //show a progress dialog
             m_progress = ProgressDialog.show(BeachActivity.this, "Connecting...", "Please wait!!!");
         }
@@ -179,23 +193,31 @@ public class BeachActivity extends AppCompatActivity {
 
     /**
      * Starts a thread which checks for any incoming messages from the input stream
-     * @param socket
+     * @param socket bluetooth socket to connect to
      */
     private void startThreadConnected(BluetoothSocket socket){
+        final String METHOD = "startThreadConnected";
         m_ThreadConnected = new ThreadConnected(socket);
         m_ThreadConnected.start();
+        Log.d(METHOD, "Thread Connected started");
     }
 
+    /**
+     * Thread class that checks the input stream from the bluetooth connection
+     */
     private class ThreadConnected extends Thread {
+        final String CLASS = "ThreadConnected";
+
         /**
          * Checks if the input stream isn't null
          * @param socket the bluetooth socket which the input stream comes from
          */
-        public ThreadConnected(BluetoothSocket socket) {
+        private ThreadConnected(BluetoothSocket socket) {
             m_inputStream = null;
 
             try {
                 m_inputStream = socket.getInputStream();
+                Log.d(CLASS, "Getting input stream");
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -215,21 +237,28 @@ public class BeachActivity extends AppCompatActivity {
                         @Override
                         public void run() {
                             if(strReceived.contains("butterflyButton")){
-                                Log.d("run", "butterflyButton");
+                                Log.d(CLASS, "butterflyButton");
                                 Uri video = Uri.parse("android.resource://" + getPackageName() + "/" +
                                         R.raw.butterfliescompressed); //do not add any extension
                                 videoView.setVideoURI(video);
                                 videoView.start();
                                 playOrigVid();
                             } else if(strReceived.contains("birdsButton")){
-                                Log.d("run", "birdsButton");
+                                Log.d(CLASS, "birdsButton");
                                 Uri video = Uri.parse("android.resource://" + getPackageName() + "/" +
                                         R.raw.birdscompressed); //do not add any extension
                                 videoView.setVideoURI(video);
                                 videoView.start();
                                 playOrigVid();
-                            } else if(strReceived.contains("pin11")){
-                                Log.d("run", "pin 11");
+                            } else if(strReceived.contains("three")){
+                                Log.d(CLASS, "pin 11");
+                                Uri video = Uri.parse("android.resource://" + getPackageName() + "/" +
+                                        R.raw.birdscompressed); //do not add any extension
+                                videoView.setVideoURI(video);
+                                videoView.start();
+                                playOrigVid();
+                            } else if(strReceived.contains("four")) {
+                                Log.d(CLASS, "pin 10");
                                 Uri video = Uri.parse("android.resource://" + getPackageName() + "/" +
                                         R.raw.birdscompressed); //do not add any extension
                                 videoView.setVideoURI(video);
@@ -252,13 +281,16 @@ public class BeachActivity extends AppCompatActivity {
      * @param s the message to be included in the toast
      */
     private void msg(String s) {
+        final String METHOD = "msg";
         Toast.makeText(getApplicationContext(), s, Toast.LENGTH_LONG).show();
+        Log.d(METHOD, "Making toast " + s);
     }
 
     /**
      * Changes the video back to the original video which just shows the beach
      */
     private void playOrigVid(){
+        final String METHOD = "playOrigVid";
         // video oncompletion listener - change back to original video
         videoView.setOnCompletionListener(
                 new MediaPlayer.OnCompletionListener() {
@@ -267,6 +299,7 @@ public class BeachActivity extends AppCompatActivity {
                         Uri video = Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.beachcompressed); //do not add any extension
                         videoView.setVideoURI(video);
                         videoView.start();
+                        Log.d(METHOD, "Starting video" + video);
                     }
                 });
     }
