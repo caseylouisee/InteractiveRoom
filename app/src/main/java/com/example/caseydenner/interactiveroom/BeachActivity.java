@@ -34,11 +34,11 @@ public class BeachActivity extends AppCompatActivity {
      * String used in logs with the class name
      */
     private final String CLASS = "BeachActivity";
-    
+
     /**
      * VideoView to view the video
      */
-    private VideoView videoView;
+    private VideoView m_videoView;
 
     /**
      * MediaController for the video view
@@ -105,15 +105,15 @@ public class BeachActivity extends AppCompatActivity {
     private void setView(){
         m_mediaController = new MediaController(this);
         m_mediaController.setVisibility(View.GONE);
-        m_mediaController.setAnchorView(videoView);
+        m_mediaController.setAnchorView(m_videoView);
 
         //Log.i("onCreate Beach", getExternalStorageDirectory().toString());
-        videoView = (VideoView) findViewById(R.id.videoView);
-        videoView.setMediaController(m_mediaController);
+        m_videoView = (VideoView) findViewById(R.id.videoView);
+        m_videoView.setMediaController(m_mediaController);
         Uri video = Uri.parse("android.resource://" + getPackageName() + "/" +
                 R.raw.beachcompressed); //do not add any extension
-        videoView.setVideoURI(video);
-        videoView.start();
+        m_videoView.setVideoURI(video);
+        m_videoView.start();
     }
 
     /**
@@ -236,35 +236,28 @@ public class BeachActivity extends AppCompatActivity {
                     runOnUiThread(new Runnable(){
                         @Override
                         public void run() {
+                            Uri video = Uri.parse("android.resource://" + getPackageName() + "/" +
+                                    R.raw.beachcompressed);
                             if(strReceived.contains("butterflyButton")){
                                 Log.d(CLASS, "butterflyButton");
-                                Uri video = Uri.parse("android.resource://" + getPackageName() + "/" +
+                                video = Uri.parse("android.resource://" + getPackageName() + "/" +
                                         R.raw.butterfliescompressed); //do not add any extension
-                                videoView.setVideoURI(video);
-                                videoView.start();
-                                playOrigVid();
                             } else if(strReceived.contains("birdsButton")){
                                 Log.d(CLASS, "birdsButton");
-                                Uri video = Uri.parse("android.resource://" + getPackageName() + "/" +
+                                video = Uri.parse("android.resource://" + getPackageName() + "/" +
                                         R.raw.birdscompressed); //do not add any extension
-                                videoView.setVideoURI(video);
-                                videoView.start();
-                                playOrigVid();
                             } else if(strReceived.contains("three")){
                                 Log.d(CLASS, "pin 11");
-                                Uri video = Uri.parse("android.resource://" + getPackageName() + "/" +
+                                video = Uri.parse("android.resource://" + getPackageName() + "/" +
                                         R.raw.birdscompressed); //do not add any extension
-                                videoView.setVideoURI(video);
-                                videoView.start();
-                                playOrigVid();
                             } else if(strReceived.contains("four")) {
                                 Log.d(CLASS, "pin 10");
-                                Uri video = Uri.parse("android.resource://" + getPackageName() + "/" +
+                                video = Uri.parse("android.resource://" + getPackageName() + "/" +
                                         R.raw.birdscompressed); //do not add any extension
-                                videoView.setVideoURI(video);
-                                videoView.start();
-                                playOrigVid();
                             }
+                            m_videoView.setVideoURI(video);
+                            m_videoView.start();
+                            playOrigVid();
                         }});
 
                 } catch (IOException e) {
@@ -292,13 +285,13 @@ public class BeachActivity extends AppCompatActivity {
     private void playOrigVid(){
         final String METHOD = "playOrigVid";
         // video oncompletion listener - change back to original video
-        videoView.setOnCompletionListener(
+        m_videoView.setOnCompletionListener(
                 new MediaPlayer.OnCompletionListener() {
                     @Override
                     public void onCompletion(MediaPlayer mp) {
                         Uri video = Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.beachcompressed); //do not add any extension
-                        videoView.setVideoURI(video);
-                        videoView.start();
+                        m_videoView.setVideoURI(video);
+                        m_videoView.start();
                         Log.d(METHOD, "Starting video" + video);
                     }
                 });

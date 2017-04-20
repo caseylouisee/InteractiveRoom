@@ -76,6 +76,9 @@ public class MainActivity extends AppCompatActivity {
         setView();
     }
 
+    /**
+     * Checks that bluetooth is enabled on the Android device and if it isn't asks the user to enable it
+     */
     private void setUpBluetooth(){
         final String METHOD = "setUpBluetooth";
 
@@ -98,6 +101,9 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Sets up the view initializing the xml components
+     */
     private void setView(){
         final String METHOD = "setView";
         m_btnBeach = (RadioButton) findViewById(R.id.radioBeach);

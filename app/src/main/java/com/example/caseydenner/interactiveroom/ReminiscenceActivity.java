@@ -109,6 +109,9 @@ public class ReminiscenceActivity extends AppCompatActivity {
 
     }
 
+    /**
+     * Sets up the view and initializes the xml components
+     */
     private void setView(){
         m_imageView1 = (ImageView) findViewById(R.id.imageView);
         m_imageView2 = (ImageView) findViewById(R.id.imageView2);

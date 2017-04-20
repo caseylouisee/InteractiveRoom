@@ -117,6 +117,9 @@ public class IntermediateReminiscence extends AppCompatActivity {
         setView();
     }
 
+    /**
+     * Sets up the view and initializes the xml components
+     */
     private void setView(){
         final String METHOD = "setView";
         Log.d(METHOD, "Setting View");
