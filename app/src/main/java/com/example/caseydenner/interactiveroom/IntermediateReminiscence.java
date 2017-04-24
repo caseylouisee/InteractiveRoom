@@ -106,6 +106,61 @@ public class IntermediateReminiscence extends AppCompatActivity {
         m_address = string;
     }
 
+    /**
+     * Method to return array of files selected by user
+     */
+    public ArrayList<String> getFiles(){
+        return m_files;
+    }
+
+    /**
+     * Method to set the files in the array of files
+     * @param files files to add to the array
+     */
+    public void setFiles(ArrayList<String> files){
+        m_files = files;
+    }
+
+    /**
+     * Method to return the file path needed to get user's videos
+     * @return m_path which is the file of the path where the user's videos are stored
+     */
+    public File getPath(){
+        return m_path;
+    }
+
+    /**
+     * Sets the m_path to the path in the method parameter
+     * @param file to set the path to
+     */
+    public void setPath(File file){
+        m_path = file;
+    }
+
+    /**
+     * returns the value of m_firstLvl
+     * @return boolean of m_firstLvl
+     */
+    public boolean getFirstLvl(){
+        return m_firstLvl;
+    }
+
+    /**
+     * Returns m_fileList
+     * @return m_fileList
+     */
+    public Item[] getFileList(){
+        return m_fileList;
+    }
+
+    /**
+     * Sets the m_fileList to the item [] in the parameter
+     * @param item list of files
+     */
+    public void setFileList(Item[] item){
+        m_fileList = item;
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         final String METHOD = "onCreate";
@@ -139,7 +194,7 @@ public class IntermediateReminiscence extends AppCompatActivity {
             public void onClick(View view) {
                 Intent intent = new Intent(IntermediateReminiscence.this, ReminiscenceActivity.class);
                 intent.putExtra(EXTRA_ADDRESS, getAddress());
-                intent.putExtra(FILES, m_files);
+                intent.putExtra(FILES, getFiles());
                 startActivity(intent);
                 finish();
             }
@@ -193,13 +248,13 @@ public class IntermediateReminiscence extends AppCompatActivity {
         final String METHOD = "loadFileList";
         Log.d(METHOD, "Loading file list");
         try {
-            m_path.mkdirs();
+            getPath().mkdirs();
         } catch (SecurityException e) {
             Log.e("Error", e.toString());
         }
 
         // Checks whether path exists
-        if (m_path.exists()) {
+        if (getPath().exists()) {
             FilenameFilter filter = new FilenameFilter() {
                 @Override
                 public boolean accept(File dir, String filename) {
@@ -209,12 +264,12 @@ public class IntermediateReminiscence extends AppCompatActivity {
                 }
             };
 
-            String[] fList = m_path.list(filter);
-            m_fileList = new Item[fList.length];
+            String[] fList = getPath().list(filter);
+            setFileList(new Item[fList.length]);
             for (int i = 0; i < fList.length; i++) {
                 m_fileList[i] = new Item(fList[i], R.mipmap.file_icon);
                 // Convert into file path
-                File sel = new File(m_path, fList[i]);
+                File sel = new File(getPath(), fList[i]);
 
                 // Set drawables
                 if (sel.isDirectory()) {
@@ -225,13 +280,13 @@ public class IntermediateReminiscence extends AppCompatActivity {
                 }
             }
 
-            if (!m_firstLvl) {
+            if (!getFirstLvl()) {
                 Item temp[] = new Item[m_fileList.length + 1];
                 for (int i = 0; i < m_fileList.length; i++) {
                     temp[i + 1] = m_fileList[i];
                     }
                 temp[0] = new Item("Up", R.mipmap.directory_up);
-                    m_fileList = temp;
+                    setFileList(temp);
             }
         } else {
             Log.e("loadFileList", "path does not exist");
@@ -280,7 +335,7 @@ public class IntermediateReminiscence extends AppCompatActivity {
         Dialog dialog = null;
         AlertDialog.Builder builder = new Builder(this);
 
-        if (m_fileList == null) {
+        if (getFileList() == null) {
             Log.e("Dialog", "No files loaded");
             dialog = builder.create();
             return dialog;
@@ -293,13 +348,13 @@ public class IntermediateReminiscence extends AppCompatActivity {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         m_chosenFile = m_fileList[which].fileName;
-                        File sel = new File(m_path + "/" + m_chosenFile);
+                        File sel = new File(getPath() + "/" + m_chosenFile);
                         if (sel.isDirectory()) {
                             m_firstLvl = false;
                             // Adds chosen directory to list
                             m_traversed.add(m_chosenFile);
                             m_fileList = null;
-                            m_path = new File(sel + "");
+                            setPath(new File(sel + ""));
                             loadFileList();
                             removeDialog(DIALOG_LOAD_FILE);
                             showDialog(DIALOG_LOAD_FILE);
