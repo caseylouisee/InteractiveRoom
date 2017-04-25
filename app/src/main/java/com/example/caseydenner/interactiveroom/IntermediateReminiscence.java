@@ -107,6 +107,22 @@ public class IntermediateReminiscence extends AppCompatActivity {
     }
 
     /**
+     * Method to return the m_traversed arrayList
+     * @return m_traversed
+     */
+    public ArrayList<String> getTraversed(){
+        return m_traversed;
+    }
+
+    /**
+     * Method to set the m_traversed arrayList to the parameter
+     * @param arrayList to set m_traversed to
+     */
+    public void setTraversed(ArrayList<String> arrayList){
+        m_traversed = arrayList;
+    }
+
+    /**
      * Method to return array of files selected by user
      */
     public ArrayList<String> getFiles(){
@@ -119,6 +135,38 @@ public class IntermediateReminiscence extends AppCompatActivity {
      */
     public void setFiles(ArrayList<String> files){
         m_files = files;
+    }
+
+    /**
+     * returns the value of m_firstLvl
+     * @return boolean of m_firstLvl
+     */
+    public boolean getFirstLvl(){
+        return m_firstLvl;
+    }
+
+    /**
+     * Method to set m_firstLvl to the bool parameter
+     * @param bool to set m_firstLvl to
+     */
+    public void setFirstLvl(Boolean bool){
+        m_firstLvl = bool;
+    }
+
+    /**
+     * Returns m_fileList
+     * @return m_fileList
+     */
+    public Item[] getFileList(){
+        return m_fileList;
+    }
+
+    /**
+     * Sets the m_fileList to the item [] in the parameter
+     * @param item list of files
+     */
+    public void setFileList(Item[] item){
+        m_fileList = item;
     }
 
     /**
@@ -138,27 +186,19 @@ public class IntermediateReminiscence extends AppCompatActivity {
     }
 
     /**
-     * returns the value of m_firstLvl
-     * @return boolean of m_firstLvl
+     * Method to return the m_chosenFile string
+     * @return m_chosenFile
      */
-    public boolean getFirstLvl(){
-        return m_firstLvl;
+    public String getChosenFile(){
+        return m_chosenFile;
     }
 
     /**
-     * Returns m_fileList
-     * @return m_fileList
+     * Method to set the m_chosenFile to the string parameter
+     * @param string to set m_chosenFile to
      */
-    public Item[] getFileList(){
-        return m_fileList;
-    }
-
-    /**
-     * Sets the m_fileList to the item [] in the parameter
-     * @param item list of files
-     */
-    public void setFileList(Item[] item){
-        m_fileList = item;
+    public void setChosenFile(String string){
+        m_chosenFile = string;
     }
 
     @Override
@@ -267,23 +307,23 @@ public class IntermediateReminiscence extends AppCompatActivity {
             String[] fList = getPath().list(filter);
             setFileList(new Item[fList.length]);
             for (int i = 0; i < fList.length; i++) {
-                m_fileList[i] = new Item(fList[i], R.mipmap.file_icon);
+                getFileList()[i] = new Item(fList[i], R.mipmap.file_icon);
                 // Convert into file path
                 File sel = new File(getPath(), fList[i]);
 
                 // Set drawables
                 if (sel.isDirectory()) {
-                    m_fileList[i].icon = R.mipmap.directory_icon;
-                    Log.d("DIRECTORY", m_fileList[i].fileName);
+                    getFileList()[i].icon = R.mipmap.directory_icon;
+                    Log.d("DIRECTORY", getFileList()[i].fileName);
                 } else {
-                    Log.d("FILE", m_fileList[i].fileName);
+                    Log.d("FILE", getFileList()[i].fileName);
                 }
             }
 
             if (!getFirstLvl()) {
-                Item temp[] = new Item[m_fileList.length + 1];
-                for (int i = 0; i < m_fileList.length; i++) {
-                    temp[i + 1] = m_fileList[i];
+                Item temp[] = new Item[getFileList().length + 1];
+                for (int i = 0; i < getFileList().length; i++) {
+                    temp[i + 1] = getFileList()[i];
                     }
                 temp[0] = new Item("Up", R.mipmap.directory_up);
                     setFileList(temp);
@@ -300,7 +340,7 @@ public class IntermediateReminiscence extends AppCompatActivity {
                 View view = super.getView(position, convertView, parent);
                 TextView textView = (TextView) view.findViewById(android.R.id.text1);
                 // put the image on the text view
-                textView.setCompoundDrawablesWithIntrinsicBounds(m_fileList[position].icon, 0, 0, 0);
+                textView.setCompoundDrawablesWithIntrinsicBounds(getFileList()[position].icon,0,0,0);
                  // add margin between image and text (support various screen densities)
                 int dp5 = (int) (5 * getResources().getDisplayMetrics().density + 0.5f);
                 textView.setCompoundDrawablePadding(dp5);
@@ -347,30 +387,30 @@ public class IntermediateReminiscence extends AppCompatActivity {
                 builder.setAdapter(m_adapter, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        m_chosenFile = m_fileList[which].fileName;
-                        File sel = new File(getPath() + "/" + m_chosenFile);
+                         setChosenFile(getFileList()[which].fileName);
+                        File sel = new File(getPath() + "/" + getChosenFile());
                         if (sel.isDirectory()) {
-                            m_firstLvl = false;
+                            setFirstLvl(false);
                             // Adds chosen directory to list
-                            m_traversed.add(m_chosenFile);
-                            m_fileList = null;
+                            getTraversed().add(getChosenFile());
+                            setFileList(null);
                             setPath(new File(sel + ""));
                             loadFileList();
                             removeDialog(DIALOG_LOAD_FILE);
                             showDialog(DIALOG_LOAD_FILE);
                         }
                         // Checks if 'up' was clicked
-                        else if (m_chosenFile.equalsIgnoreCase("up") && !sel.exists()) {
+                        else if (getChosenFile().equalsIgnoreCase("up") && !sel.exists()) {
                             // present directory removed from list
-                            String s = m_traversed.remove(m_traversed.size() - 1);
+                            String s = getTraversed().remove(getTraversed().size() - 1);
                             // path modified to exclude present directory
-                            m_path = new File(m_path.toString().substring(0, m_path.toString().lastIndexOf(s)));
-                            m_fileList = null;
+                            setPath(new File(getPath().toString().substring(0, getPath().toString().lastIndexOf(s))));
+                            setFileList(null);
 
                             // if there are no more directories in the list, then
                             // its the first level
-                            if (m_traversed.isEmpty()) {
-                                m_firstLvl = true;
+                            if (getTraversed().isEmpty()) {
+                                setFirstLvl(true);
                             }
                             loadFileList();
                             removeDialog(DIALOG_LOAD_FILE);
@@ -378,7 +418,7 @@ public class IntermediateReminiscence extends AppCompatActivity {
                         }
                         // File picked
                         else {
-                            m_files.add(m_chosenFile);
+                            getFiles().add(getChosenFile());
                         }
                     }
                 });

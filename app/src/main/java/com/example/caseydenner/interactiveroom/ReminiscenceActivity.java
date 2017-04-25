@@ -43,6 +43,11 @@ public class ReminiscenceActivity extends AppCompatActivity {
     private ImageView m_imageView1, m_imageView2, m_imageView3, m_imageView4;
 
     /**
+     * ProgressDialog to show the progress of the bluetooth connection
+     */
+    private ProgressDialog m_progress;
+
+    /**
      * Bluetooth adapter
      */
     private BluetoothAdapter m_Bluetooth = null;
@@ -61,11 +66,6 @@ public class ReminiscenceActivity extends AppCompatActivity {
      * Thread to manage the bluetooth connection
      */
     private ThreadConnected m_ThreadConnected;
-
-    /**
-     * ProgressDialog to show the progress of the bluetooth connection
-     */
-    private ProgressDialog m_progress;
 
     /**
      * Boolean to check whether bluetooth is connected to a device
@@ -92,6 +92,149 @@ public class ReminiscenceActivity extends AppCompatActivity {
      */
     private String m_path = Environment.getExternalStorageDirectory() + "/DCIM/100MEDIA/";
 
+    /**
+     * Method to retrieve the bluetooth adapter
+     * @return m_bluetooth
+     */
+    public BluetoothAdapter getBluetooth(){
+        return m_Bluetooth;
+    }
+
+    /**
+     * Method to set m_Bluetooth to bt in parameter
+     * @param bt to set m_bluetooth to
+     */
+    public void setBluetooth(BluetoothAdapter bt){
+        m_Bluetooth = bt;
+    }
+
+    /**
+     * Method to return the bluetooth socket
+     * @return m_btSocket
+     */
+    public BluetoothSocket getBluetoothSocket(){
+        return m_btSocket;
+    }
+
+    /**
+     * Method to set the bluetooth socket to the parameter
+     * @param bs to set the bluetooth socket to
+     */
+    public void setBluetoothSocket(BluetoothSocket bs){
+        m_btSocket = bs;
+    }
+
+    /**
+     * Method to retrieve the inputStream
+     * @return m_inputStream
+     */
+    public InputStream getInputStream(){
+        return m_inputStream;
+    }
+
+    /**
+     * Method to set the input stream to the parameter
+     * @param is to set the m_inputStream to
+     */
+    public void setInputStream(InputStream is){
+        m_inputStream = is;
+    }
+
+    /**
+     * Method to retrieve the connected thread m_ThreadConnected
+     * @return m_ThreadConnected
+     */
+    public ThreadConnected getThreadConnected(){
+        return m_ThreadConnected;
+    }
+
+    /**
+     * Method to set the thread connected to the parameter
+     * @param tc to set m_threadConnected to
+     */
+    public void setThreadConnected(ThreadConnected tc){
+        m_ThreadConnected = tc;
+    }
+
+    /**
+     * Method to retrieve m_isBTConnected boolean
+     * @return m_isBTConnected
+     */
+    public boolean getIsBTConnected(){
+        return m_isBtConnected;
+    }
+
+    /**
+     * Method to set m_isBTConnected to boolean parameter
+     * @param bool to set m_isBTConnected to
+     */
+    public void setIsBTConnected(Boolean bool){
+        m_isBtConnected = bool;
+    }
+
+    /**
+     * Method to retrieve m_address
+     * @return m_address string
+     */
+    public String getAddress(){
+        return m_address;
+    }
+
+    /**
+     * Method to set m_address to the string parameter
+     * @param string to set m_address to
+     */
+    public void setAddress(String string){
+        m_address = string;
+    }
+
+    /**
+     * Method to return array of files selected by user
+     */
+    public ArrayList<String> getFiles(){
+        return m_files;
+    }
+
+    /**
+     * Method to set the files in the array of files
+     * @param files files to add to the array
+     */
+    public void setFiles(ArrayList<String> files){
+        m_files = files;
+    }
+
+    /**
+     * Method to retrieve m_rotate
+     * @return m_rotate
+     */
+    public int getRotate(){
+        return m_rotate;
+    }
+
+    /**
+     * Method to setRotate to int parameter
+     * @param r to set m_rotate to
+     */
+    public void setRotate(int r){
+        m_rotate = r;
+    }
+
+    /**
+     * Method to return the file path needed to get user's videos
+     * @return m_path which is the file of the path where the user's videos are stored
+     */
+    public String getPath(){
+        return m_path;
+    }
+
+    /**
+     * Sets the m_path to the path in the method parameter
+     * @param string to set the path to
+     */
+    public void setPath(String string){
+        m_path = string;
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         final String METHOD = "onCreate";
@@ -100,8 +243,8 @@ public class ReminiscenceActivity extends AppCompatActivity {
         setContentView(R.layout.activity_reminiscence);
 
         Intent newInt = getIntent();
-        m_address = newInt.getStringExtra(IntermediateReminiscence.EXTRA_ADDRESS);
-        m_files = newInt.getStringArrayListExtra(IntermediateReminiscence.FILES);
+        setAddress(newInt.getStringExtra(IntermediateReminiscence.EXTRA_ADDRESS));
+        setFiles(newInt.getStringArrayListExtra(IntermediateReminiscence.FILES));
 
         new ConnectBT().execute(); //Call the class to connect
 
@@ -118,22 +261,22 @@ public class ReminiscenceActivity extends AppCompatActivity {
         m_imageView3 = (ImageView) findViewById(R.id.imageView3);
         m_imageView4 = (ImageView) findViewById(R.id.imageView4);
 
-        int fileSize = m_files.size();
+        int fileSize = getFiles().size();
         for(int i = 0; i<fileSize; i++){
             if(i==0){
-                File imageFile = new File(m_path+m_files.get(i));
+                File imageFile = new File(getPath()+getFiles().get(i));
                 checkOrientation(imageFile);
                 setImageView(m_imageView1, i, imageFile);
             } if(i==1) {
-                File imageFile = new File(m_path+m_files.get(i));
+                File imageFile = new File(getPath()+getFiles().get(i));
                 checkOrientation(imageFile);
                 setImageView(m_imageView2, i, imageFile);
             } if(i==2){
-                File imageFile = new File(m_path+m_files.get(i));
+                File imageFile = new File(getPath()+getFiles().get(i));
                 checkOrientation(imageFile);
                 setImageView(m_imageView3, i, imageFile);
             } if(i==3){
-                File imageFile = new File(m_path+m_files.get(i));
+                File imageFile = new File(getPath()+getFiles().get(i));
                 checkOrientation(imageFile);
                 setImageView(m_imageView4, i, imageFile);
             }
@@ -148,17 +291,17 @@ public class ReminiscenceActivity extends AppCompatActivity {
      * @param imageFile The image to be displayed in the view
      */
     private void setImageView(ImageView imageView, int i, File imageFile) {
-        if(m_files.get(i).endsWith("mp4")){
+        if(getFiles().get(i).endsWith("mp4")){
             Bitmap bMap = ThumbnailUtils.createVideoThumbnail(imageFile.getAbsolutePath(),
                     MediaStore.Video.Thumbnails.MINI_KIND);
             imageView.setImageBitmap(bMap);
         } else {
             imageView.setImageURI(null);
-            imageView.setImageURI(Uri.parse(m_path + m_files.get(i)));
-            imageView.setRotation(m_rotate);
+            imageView.setImageURI(Uri.parse(getPath() + getFiles().get(i)));
+            imageView.setRotation(getRotate());
         }
         imageView.invalidate();
-        Log.d("onCreate", "imageView set: " + m_path+m_files.get(i) + " rotation: " + m_rotate);
+        Log.d("onCreate", "imageView set: " + getPath()+getFiles().get(i) + " rotation: " + getRotate());
     }
 
     /**
@@ -166,9 +309,9 @@ public class ReminiscenceActivity extends AppCompatActivity {
      */
     @Override
     public void onBackPressed(){
-        if (m_btSocket!=null) {
+        if (getBluetoothSocket()!=null) {
             try {
-                m_btSocket.close(); //close connection
+                getBluetoothSocket().close(); //close connection
             }
             catch (IOException e) {
                 msg("Error");
@@ -196,15 +339,15 @@ public class ReminiscenceActivity extends AppCompatActivity {
         @Override
         protected Void doInBackground(Void... devices){
             try {
-                if (m_btSocket == null || !m_isBtConnected) {
+                if (getBluetoothSocket() == null || !getIsBTConnected()) {
                     //get the mobile bluetooth device
-                    m_Bluetooth = BluetoothAdapter.getDefaultAdapter();
+                    setBluetooth(BluetoothAdapter.getDefaultAdapter());
                     //connects to the device's address and checks if it's available
-                    BluetoothDevice bluetoothDevice = m_Bluetooth.getRemoteDevice(m_address);
+                    BluetoothDevice bluetoothDevice = getBluetooth().getRemoteDevice(getAddress());
                     //create a RFCOMM (SPP) connection
-                    m_btSocket = bluetoothDevice.createInsecureRfcommSocketToServiceRecord(MYUUID);
+                    setBluetoothSocket(bluetoothDevice.createInsecureRfcommSocketToServiceRecord(MYUUID));
                     BluetoothAdapter.getDefaultAdapter().cancelDiscovery();
-                    m_btSocket.connect();//start connection
+                    getBluetoothSocket().connect();//start connection
 
                 }
             }
@@ -224,8 +367,8 @@ public class ReminiscenceActivity extends AppCompatActivity {
 
             if (connectSuccess){
                 msg("Connected.");
-                m_isBtConnected = true;
-                startThreadConnected(m_btSocket);
+                setIsBTConnected(true);
+                startThreadConnected(getBluetoothSocket());
             }
             m_progress.dismiss();
         }
@@ -236,8 +379,8 @@ public class ReminiscenceActivity extends AppCompatActivity {
      * @param socket bluetooth socket to connect to
      */
     private void startThreadConnected(BluetoothSocket socket){
-        m_ThreadConnected = new ThreadConnected(socket);
-        m_ThreadConnected.start();
+        setThreadConnected(new ThreadConnected(socket));
+        getThreadConnected().start();
     }
 
     private class ThreadConnected extends Thread {
@@ -246,10 +389,10 @@ public class ReminiscenceActivity extends AppCompatActivity {
          * @param socket the bluetooth socket which the input stream comes from
          */
         private ThreadConnected(BluetoothSocket socket) {
-            m_inputStream = null;
+            setInputStream(null);
 
             try {
-                m_inputStream = socket.getInputStream();
+                setInputStream(socket.getInputStream());
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -260,33 +403,33 @@ public class ReminiscenceActivity extends AppCompatActivity {
             byte[] buffer = new byte[1024];
             int bytes;
 
-            while (m_btSocket.isConnected()) {
+            while (getBluetoothSocket().isConnected()) {
                 try {
-                    bytes = m_inputStream.read(buffer);
+                    bytes = getInputStream().read(buffer);
                     final String strReceived = new String(buffer, 0, bytes);
 
                     runOnUiThread(new Runnable(){
                         @Override
                         public void run() {
                             if(strReceived.contains("butterflyButton")){
-                                Log.d("butterflyButton", m_path+m_files.get(0) + " to play in zoomActivity");
+                                Log.d("butterflyButton", getPath()+getFiles().get(0) + " to play in zoomActivity");
                                 Intent intent = new Intent(ReminiscenceActivity.this, ZoomActivity.class);
-                                intent.putExtra(FILE, m_path+m_files.get(0));
+                                intent.putExtra(FILE, getPath()+getFiles().get(0));
                                 startActivity(intent);
                             } else if(strReceived.contains("birdsButton")){
-                                Log.d("butterflyButton", m_path+m_files.get(1) + " to play in zoomActivity");
+                                Log.d("butterflyButton", getPath()+getFiles().get(1) + " to play in zoomActivity");
                                 Intent intent = new Intent(ReminiscenceActivity.this, ZoomActivity.class);
-                                intent.putExtra(FILE, m_path+m_files.get(1));
+                                intent.putExtra(FILE, getPath()+getFiles().get(1));
                                 startActivity(intent);
                             } else if(strReceived.contains("three")){
-                                Log.d("three", m_path+m_files.get(2) + " to play in zoomActivity");
+                                Log.d("three", getPath()+getFiles().get(2) + " to play in zoomActivity");
                                 Intent intent = new Intent(ReminiscenceActivity.this, ZoomActivity.class);
-                                intent.putExtra(FILE, m_path+m_files.get(2));
+                                intent.putExtra(FILE, getPath()+getFiles().get(2));
                                 startActivity(intent);
                             } else if(strReceived.contains("four")) {
-                                Log.d("four", m_path+m_files.get(3) + " to play in zoomActivity");
+                                Log.d("four", getPath()+getFiles().get(3) + " to play in zoomActivity");
                                 Intent intent = new Intent(ReminiscenceActivity.this, ZoomActivity.class);
-                                intent.putExtra(FILE, m_path+m_files.get(3));
+                                intent.putExtra(FILE, getPath()+getFiles().get(3));
                                 startActivity(intent);
                             }
                         }});
@@ -306,7 +449,7 @@ public class ReminiscenceActivity extends AppCompatActivity {
      * @param imageFile file to check orientation of
      */
     public void checkOrientation(File imageFile){
-        m_rotate=0;
+        setRotate(0);
         ExifInterface exif = null;
         try {
             exif = new ExifInterface(imageFile.getAbsolutePath());
@@ -316,13 +459,13 @@ public class ReminiscenceActivity extends AppCompatActivity {
         int orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
         switch (orientation) {
             case ExifInterface.ORIENTATION_ROTATE_270:
-                m_rotate = 270;
+                setRotate(270);
                 break;
             case ExifInterface.ORIENTATION_ROTATE_180:
-                m_rotate = 180;
+                setRotate(180);
                 break;
             case ExifInterface.ORIENTATION_ROTATE_90:
-                m_rotate = 90;
+                setRotate(90);
                 break;
         }
     }

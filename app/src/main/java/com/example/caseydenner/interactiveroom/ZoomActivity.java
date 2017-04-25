@@ -33,6 +33,38 @@ public class ZoomActivity extends AppCompatActivity {
      */
     private int m_rotate;
 
+    /**
+     * Method to retrieve the file
+     * @return string m_file
+     */
+    public String getFile(){
+        return m_file;
+    }
+
+    /**
+     * Method to set the file m_file to the parameter
+     * @param string to set the file to
+     */
+    public void setFile(String string){
+        m_file = string;
+    }
+
+    /**
+     * Method to retrieve the rotation
+     * @return m_rotate
+     */
+    public int getRotate(){
+        return m_rotate;
+    }
+
+    /**
+     * Method to set m_rotate to the int parameter
+     * @param r to set m_rotate to
+     */
+    public void setRotate(int r){
+        m_rotate = r;
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -40,10 +72,10 @@ public class ZoomActivity extends AppCompatActivity {
         Log.d("OnCreate", "Zoom Activity");
 
         Intent newInt = getIntent();
-        m_file = newInt.getStringExtra(ReminiscenceActivity.FILE);
+        setFile(newInt.getStringExtra(ReminiscenceActivity.FILE));
 
         videoView = (VideoView) findViewById(R.id.videoViewZoomed);
-        File file = new File(m_file);
+        File file = new File(getFile());
 
         ReminiscenceActivity reminiscenceActivity = new ReminiscenceActivity();
         reminiscenceActivity.checkOrientation(file);
@@ -53,8 +85,8 @@ public class ZoomActivity extends AppCompatActivity {
         m_mediaController.setAnchorView(videoView);
         videoView.setMediaController(m_mediaController);
 
-        videoView.setVideoPath(m_file);
-        videoView.setRotation(m_rotate);
+        videoView.setVideoPath(getFile());
+        videoView.setRotation(getRotate());
         videoView.start();
 
         videoView.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {

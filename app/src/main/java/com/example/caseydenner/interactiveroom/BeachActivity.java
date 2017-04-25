@@ -12,6 +12,8 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.MediaController;
 import android.widget.Toast;
 import android.widget.VideoView;
@@ -46,6 +48,11 @@ public class BeachActivity extends AppCompatActivity {
     private MediaController m_mediaController;
 
     /**
+     * ProgressDialog used to show progress of the connection to the Arduino
+     */
+    private ProgressDialog m_progress;
+
+    /**
      * Bluetooth adapter
      */
     private BluetoothAdapter m_Bluetooth = null;
@@ -59,11 +66,6 @@ public class BeachActivity extends AppCompatActivity {
      * InputStream used to retrieve information sent from Arduino to Android via bluetooth
      */
     private InputStream m_inputStream;
-
-    /**
-     * ProgressDialog used to show progress of the connection to the Arduino
-     */
-    private ProgressDialog m_progress;
 
     /**
      * Thread to manage the bluetooth connection
@@ -81,6 +83,102 @@ public class BeachActivity extends AppCompatActivity {
     private boolean m_isBtConnected = false;
 
     /**
+     * Method to retrieve the bluetooth adapter
+     * @return m_bluetooth
+     */
+    public BluetoothAdapter getBluetooth(){
+        return m_Bluetooth;
+    }
+
+    /**
+     * Method to set m_Bluetooth to bt in parameter
+     * @param bt to set m_bluetooth to
+     */
+    public void setBluetooth(BluetoothAdapter bt){
+        m_Bluetooth = bt;
+    }
+
+    /**
+     * Method to return the bluetooth socket
+     * @return m_btSocket
+     */
+    public BluetoothSocket getBluetoothSocket(){
+        return m_btSocket;
+    }
+
+    /**
+     * Method to set the bluetooth socket to the parameter
+     * @param bs to set the bluetooth socket to
+     */
+    public void setBluetoothSocket(BluetoothSocket bs){
+        m_btSocket = bs;
+    }
+
+    /**
+     * Method to retrieve the inputStream
+     * @return m_inputStream
+     */
+    public InputStream getInputStream(){
+        return m_inputStream;
+    }
+
+    /**
+     * Method to set the input stream to the parameter
+     * @param is to set the m_inputStream to
+     */
+    public void setInputStream(InputStream is){
+        m_inputStream = is;
+    }
+
+    /**
+     * Method to retrieve m_address
+     * @return m_address string
+     */
+    public String getAddress(){
+        return m_address;
+    }
+
+    /**
+     * Method to set m_address to the string parameter
+     * @param string to set m_address to
+     */
+    public void setAddress(String string){
+        m_address = string;
+    }
+
+    /**
+     * Method to retrieve m_isBTConnected boolean
+     * @return m_isBTConnected
+     */
+    public boolean getIsBTConnected(){
+        return m_isBtConnected;
+    }
+
+    /**
+     * Method to set m_isBTConnected to boolean parameter
+     * @param bool to set m_isBTConnected to
+     */
+    public void setIsBTConnected(Boolean bool){
+        m_isBtConnected = bool;
+    }
+
+    /**
+     * Method to retrieve the connected thread m_ThreadConnected
+     * @return m_ThreadConnected
+     */
+    public ThreadConnected getThreadConnected(){
+        return m_ThreadConnected;
+    }
+
+    /**
+     * Method to set the thread connected to the parameter
+     * @param tc to set m_threadConnected to
+     */
+    public void setThreadConnected(ThreadConnected tc){
+        m_ThreadConnected = tc;
+    }
+
+    /**
      * Called when the BeachActivity is created
      * @param savedInstanceState the state in which the application was ended is
      *                           saved to be used in the future if the application is reopened
@@ -93,7 +191,7 @@ public class BeachActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         Intent newInt = getIntent();
         //receive the address of the bluetooth device
-        m_address = newInt.getStringExtra(MainActivity.EXTRA_ADDRESS);
+        setAddress(newInt.getStringExtra(MainActivity.EXTRA_ADDRESS));
         setContentView(R.layout.activity_beach);
         new ConnectBT().execute(); //Call the class to connect
         setView();
@@ -123,9 +221,9 @@ public class BeachActivity extends AppCompatActivity {
     public void onBackPressed(){
         final String METHOD = "onBackPressed";
         Log.d(METHOD, "back buton pressed");
-        if (m_btSocket!=null) {
+        if (getBluetoothSocket()!=null) {
             try {
-                m_btSocket.close(); //close connection
+                getBluetoothSocket().close(); //close connection
             }
             catch (IOException e) {
                 msg("Error");
@@ -156,15 +254,15 @@ public class BeachActivity extends AppCompatActivity {
         @Override
         protected Void doInBackground(Void... devices){
             try {
-                if (m_btSocket == null || !m_isBtConnected) {
+                if (getBluetoothSocket() == null || !getIsBTConnected()) {
                     //get the mobile bluetooth device
-                    m_Bluetooth = BluetoothAdapter.getDefaultAdapter();
+                    setBluetooth(BluetoothAdapter.getDefaultAdapter());
                     //connects to the device's address and checks if it's available
-                    BluetoothDevice bluetoothDevice = m_Bluetooth.getRemoteDevice(m_address);
+                    BluetoothDevice bluetoothDevice = getBluetooth().getRemoteDevice(getAddress());
                     //create a RFCOMM (SPP) connection
-                    m_btSocket = bluetoothDevice.createInsecureRfcommSocketToServiceRecord(MYUUID);
+                    setBluetoothSocket(bluetoothDevice.createInsecureRfcommSocketToServiceRecord(MYUUID));
                     BluetoothAdapter.getDefaultAdapter().cancelDiscovery();
-                    m_btSocket.connect();//start connection
+                    getBluetoothSocket().connect();//start connection
 
                 }
             }
@@ -184,8 +282,8 @@ public class BeachActivity extends AppCompatActivity {
 
             if (connectSuccess){
                 msg("Connected.");
-                m_isBtConnected = true;
-                startThreadConnected(m_btSocket);
+                setIsBTConnected(true);
+                startThreadConnected(getBluetoothSocket());
             }
             m_progress.dismiss();
         }
@@ -197,8 +295,8 @@ public class BeachActivity extends AppCompatActivity {
      */
     private void startThreadConnected(BluetoothSocket socket){
         final String METHOD = "startThreadConnected";
-        m_ThreadConnected = new ThreadConnected(socket);
-        m_ThreadConnected.start();
+        setThreadConnected(new ThreadConnected(socket));
+        getThreadConnected().start();
         Log.d(METHOD, "Thread Connected started");
     }
 
@@ -213,10 +311,10 @@ public class BeachActivity extends AppCompatActivity {
          * @param socket the bluetooth socket which the input stream comes from
          */
         private ThreadConnected(BluetoothSocket socket) {
-            m_inputStream = null;
+            setInputStream(null);
 
             try {
-                m_inputStream = socket.getInputStream();
+                setInputStream(socket.getInputStream());
                 Log.d(CLASS, "Getting input stream");
             } catch (IOException e) {
                 e.printStackTrace();
@@ -228,36 +326,43 @@ public class BeachActivity extends AppCompatActivity {
             byte[] buffer = new byte[1024];
             int bytes;
 
-            while (m_btSocket.isConnected()) {
+            while (getBluetoothSocket().isConnected()) {
                 try {
-                    bytes = m_inputStream.read(buffer);
+                    bytes = getInputStream().read(buffer);
                     final String strReceived = new String(buffer, 0, bytes);
 
                     runOnUiThread(new Runnable(){
                         @Override
                         public void run() {
-                            Uri video = Uri.parse("android.resource://" + getPackageName() + "/" +
-                                    R.raw.beachcompressed);
                             if(strReceived.contains("butterflyButton")){
                                 Log.d(CLASS, "butterflyButton");
-                                video = Uri.parse("android.resource://" + getPackageName() + "/" +
+                                Uri video = Uri.parse("android.resource://" + getPackageName() + "/" +
                                         R.raw.butterfliescompressed); //do not add any extension
+                                m_videoView.setVideoURI(video);
+                                m_videoView.start();
+                                playOrigVid();
                             } else if(strReceived.contains("birdsButton")){
                                 Log.d(CLASS, "birdsButton");
-                                video = Uri.parse("android.resource://" + getPackageName() + "/" +
+                                Uri video = Uri.parse("android.resource://" + getPackageName() + "/" +
                                         R.raw.birdscompressed); //do not add any extension
+                                m_videoView.setVideoURI(video);
+                                m_videoView.start();
+                                playOrigVid();
                             } else if(strReceived.contains("three")){
                                 Log.d(CLASS, "pin 11");
-                                video = Uri.parse("android.resource://" + getPackageName() + "/" +
-                                        R.raw.birdscompressed); //do not add any extension
+                                Uri video = Uri.parse("android.resource://" + getPackageName() + "/" +
+                                        R.raw.firecompressed); //do not add any extension
+                                m_videoView.setVideoURI(video);
+                                m_videoView.start();
+                                playOrigVid();
                             } else if(strReceived.contains("four")) {
                                 Log.d(CLASS, "pin 10");
-                                video = Uri.parse("android.resource://" + getPackageName() + "/" +
-                                        R.raw.birdscompressed); //do not add any extension
+                                Uri video = Uri.parse("android.resource://" + getPackageName() + "/" +
+                                        R.raw.planecompressed); //do not add any extension
+                                m_videoView.setVideoURI(video);
+                                m_videoView.start();
+                                playOrigVid();
                             }
-                            m_videoView.setVideoURI(video);
-                            m_videoView.start();
-                            playOrigVid();
                         }});
 
                 } catch (IOException e) {
